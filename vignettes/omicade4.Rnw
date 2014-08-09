@@ -1,0 +1,221 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath}
+\usepackage{times}
+%\usepackage{hyperref}
+\usepackage[numbers]{natbib}
+\usepackage{graphicx}
+<<style, eval=TRUE, echo=FALSE, results=tex>>=
+BiocStyle::latex(bibstyle="unsrt")
+@
+
+
+\title{Multiple Co-inertia Analysis of Multiple
+OMICS Data using \Rpackage{omicade4}}
+\author{Chen Meng and Amin Moghaddas Gholami}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+% \VignetteIndexEntry{Using omicade4}
+\setkeys{Gin}{width=0.6\textwidth} 
+
+\maketitle
+\tableofcontents
+
+\setlength\parindent{0pt}
+% ================================================= Introduction =================================================
+\section{Introduction}
+
+Modern "omics" technologies enable quantitative monitoring of the abundance of various biological molecules 
+in a high-throughput manner, accumulating an unprecedented amount of quantitative information on a genomic 
+scale. Systematic integration and comparison of multiple layers of information is required to provide deeper 
+insights into biological systems.
+
+Multivariate approaches have been applied successfully in the analysis of high throughput "omics" data. 
+Principal component analysis (PCA) has been shown to be useful in exploratory analysis of linear trends 
+in biological data \cite{pca}. Culhane and colleagues employed a two table coupling method (co-inertia analysis, CIA) 
+to examine covariant gene expression patterns between microarray datasets from two different 
+platforms \cite{cia2003}. Although PCA is available in several R packages, the \Biocpkg{ade4} and \Biocpkg{made4} 
+contain many additional multivariate statistical methods including methods for analysis of one data table, 
+coupling of two data tables or multi-table analysis \cite{ade4, ade4ii}. These methods for integrating multiple 
+datasets make these particular packages very attractive for analysis of multi-omics data. \Biocpkg{omicade4} 
+is developed as an extension to \Biocpkg{ade4} and \Biocpkg{made4} to facilitate input and analysis of more than two omics 
+datasets. 
+
+\Biocpkg{omicade4} provides functions for multiple co-inertia analysis and for graphical representation, 
+so that the general similarity of different datasets could be easily interpreted. The method could be applied 
+when several set of variables (genes, transcripts, proteins) are measured on the same set of individuals 
+(cell lines, patients).
+This vignette provides a case study on a toy NCI-60 dataset to show the usage of this package. 
+In addition, the package provides methods for S3 class \Rclass{cia}, which encapsulates results from the co-inertia 
+analysis by \Rfunction{cia} function from \Biocpkg{made4}. Therefore, functions from \Biocpkg{made4} and \Biocpkg{ade4} 
+are also called in this vignette. For more information please refer to \cite{omicade4} and several recent reviews.
+
+
+% ================================================= Quick start =================================================
+\section{Quick Start}
+
+The package includes example data from four different microarray platforms (i.e.,  
+Agilent, Affymetrix HGU 95, Affymetrix HGU 133 and Affymetrix HGU 133plus 2.0) on the NCI-60 cell lines. 
+The package and datasets are loaded by the commands:
+<<load_lib_data>>=
+library(omicade4)
+data(NCI60_4arrays)
+@
+
+\Robject{NCI60\_4arrays} is a list containing the NCI-60 microarray data with only few hundreds of genes randomly 
+selected in each platform to keep the size of the Bioconductor package small. 
+However, the full datasets are available in \cite{cellminer}. 
+% ------------------------------------------ Data view -----------------------------------------
+\subsection{Data Overview}
+
+MCIA links the individuals (samples in column) in different datasets and thus the columns will be 
+linked between the multiple datasets. 
+Thus we have to ensure that the order of samples (the columns) in all datasets is the same
+before performing MCIA. The number of variables (genes) does not need to be the 
+same. We can check the dimension of each dataset in the list by
+<<check_col_number>>=
+sapply(NCI60_4arrays, dim)
+@
+And check whether samples are ordered correctly
+
+<<Check_col_order>>=
+all(apply((x <- sapply(NCI60_4arrays, colnames))[,-1], 2, function(y)
+identical(y, x[,1])))
+@
+
+
+Before performing the MCIA, we can use hierarchical clustering to have a general idea about similarity
+of cell lines, which can be done with the following command. We will compare the clustering result
+with MCIA.
+<<cluster_data_separately, fig=TRUE, include=FALSE>>=
+layout(matrix(1:4, 1, 4))
+par(mar=c(2, 1, 0.1, 6))
+for (df in NCI60_4arrays) {
+  d <- dist(t(df))
+  hcl <- hclust(d)
+  dend <- as.dendrogram(hcl)
+  plot(dend, horiz=TRUE)
+}
+@
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics{omicade4-cluster_data_separately}
+\caption{The hierarchical clustering of NCI-60 cell lines}
+\label{clust}
+\end{center}
+\end{figure}
+
+% ------------------------------------------ MCIA -----------------------------------------
+\subsection{Data Exploration with Multiple Co-inertia Analysis}
+
+The main function \Rfunction{mcia} can be used to perform multiple co-inertia analysis:
+<<MCIA>>=
+mcoin <- mcia(NCI60_4arrays, cia.nf=10)
+class(mcoin)
+@
+It returns an object of class \Rclass{mcia}. There are several methods that could be applied
+on this class. To visualize the result, one can use \Rfunction{plot} directly. However, because
+there are nine cancer types, we want to distinguish the cell lines by their original 
+cancer type. This can be done by defining a phenotype factor in \Rfunction{plot}. 
+The following commands create a vector to indicate the cell line groups.
+<<get_cancertype>>=
+cancer_type <- colnames(NCI60_4arrays$agilent)
+cancer_type <- sapply(strsplit(cancer_type, split="\\."), function(x) x[1])
+cancer_type
+@
+
+Next, we plot the result for the first two principal components
+<<plot_mcia_cancertype, fig=TRUE, include=FALSE>>=
+plot(mcoin, axes=1:2, phenovec=cancer_type, sample.lab=FALSE, df.color=1:4)
+@ 
+\begin{figure}[h!]
+\begin{center}
+\includegraphics{omicade4-plot_mcia_cancertype}
+\caption{The MCIA plot of NCI-60 data}
+\label{mcia12}
+\end{center}
+\end{figure}
+
+This command produces a 4-panel figure as shown in figure \ref{mcia12}. The top left
+panel is the sample space, where each cell line is projected. 
+Shapes represent samples in different platforms. Same cell lines
+are linked by edges. The shorter the edge, the better the
+correlation of samples in different platforms. In our sample plot, a relatively high correlation of 
+all microarray datasets is depicted by the short edges. Furthermore, 
+in most cancer types except lung cancer and breast cancer, cell lines having the same
+origin are closely projected, which indicates high homogeneity of these cancer types.
+This agrees with the hierarchical clustering (figure \ref{clust}). 
+
+\vspace{8 mm}
+The next interesting question is which genes are responsible for defining
+the coordinates of samples. The top right panel is the variable (gene) space, e.g.,
+genes from different platforms, which are distinguished by
+colors and shapes, are projected on this space.
+In this panel, a gene that is particularly highly expressed in a certain cell 
+line will be located on the direction of this cell line. The farther away towards 
+the outer margin, the stronger the 
+association is. Equally, genes projected on the opposite direction from the origin 
+indicate that they are lost or down regulated in those cell lines. 
+From this sense, since the melanoma cell lines are highly weighted on the positive 
+side of the horizontal axis in the first panel, the corresponding melanoma highly expressed genes are on the same 
+direction. The following command could be used to select melanoma associated genes
+according to the coordinate of genes in that space
+
+<<selectvar_mcia_melan>>=
+melan_gene <- selectVar(mcoin, a1.lim=c(2, Inf), a2.lim=c(-Inf, Inf))
+melan_gene
+@
+
+The first column represents gene names, the subsequent columns indicate which 
+genes are identified in which platforms, and the last column is a statistic of the total
+number of platforms identifying the corresponding gene in the selected region. 
+
+\vspace{8 mm}
+The bottom left panel in figure \ref{mcia12} shows the eigenvalue for each eigenvector.
+The barplot represents the absolute eigenvalues. The dots
+linked by lines indicate the proportion of variance for the eigenvectors.
+Cyan bars indicate the eigenvectors kept in the analysis. In this case, we kept 10 
+eigenvectors, and the top three axes have a relative large eigenvalue 
+according to the scree plot. Therefore, not only the top two axes, but 
+also the third one could lead to some interesting findings. Different axes could be 
+explored by changing the \Rcode{axes} argument in \Rfunction{plot}, such as:
+<<plot_mcia_axes>>=
+plot(mcoin, axes=c(1, 3), phenovec=cancer_type, sample.lab=FALSE, df.color=1:4)
+plot(mcoin, axes=c(2, 3), phenovec=cancer_type, sample.lab=FALSE, df.color=1:4)
+@
+
+Finally, the bottom right panel in figure \ref{mcia12} shows the pseudo-eigenvalues space of all datasets, 
+which indicates how much variance of an eigenvalue is contributed by each dataset.
+In this example, the HGU 95 is highly weighted on the first axis. Therefore, this
+dataset contributes the most variance on this axis among four datasets. However, the HGU 133 plus 2.0
+data highly contribute to the second axis. Note that we selected some melanoma related 
+genes by limiting the first axis using \Rfunction{selectVar} function, where we identified
+four genes in Agilent and HGU 95 platforms comparing to only one gene in the HGU 133 plus 2.0 platform, which
+is in agreement with the result suggested by this plot.
+
+\vspace{8 mm}
+In addition, the function \Rfunction{plotVar}
+could be used to visualize the gene space, given a list of genes of interest. 
+Let's get back to the melanoma genes again, we know that {\it S100B} and {\it S100A1} are  
+detected in more than one dataset. Now, we want
+to know where these genes are projected on the gene space. This could be visualized by
+<<plotvar_mcia, fig=TRUE, include=FALSE, results=hide>>=
+geneStat <- plotVar(mcoin, var=c("S100B", "S100A1"), var.lab=TRUE)
+@
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics{omicade4-plotvar_mcia}
+\caption{visualization of genes of interest in CIA}
+\label{genespace1}
+\end{center}
+\end{figure}
+@
+
+The output plot is shown in figure \ref{genespace1}.
+
+
+\bibliography{omicade4}
+\end{document}

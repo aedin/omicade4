@@ -1,0 +1,74 @@
+@Article{made4,
+    title = {MADE4:an R package for multivariate analysis of gene expression data},
+    author = {Culhane AC and Thioulouse J and Perriere G and Higgins DG},
+    journal = {Bioinformatics},
+    year = {2005},
+    volume = {21(11)},
+    pages = {2789-90.},
+  }
+
+@Article{ade4,
+    title = {The ade4 package: implementing the duality diagram for ecologists},
+    author = {Dray S and Dufour AB},
+    journal = {Journal of Statistical Software},
+    year = {2007},
+    volume = {22(4)},
+    pages = {1-20},
+  }
+
+@Article{ade4ii,
+    title = {The ade4 package-II: Two-table and K-table methods},
+    author = {Dray S and Dufour AB and Chessel D},
+    journal = {R News},
+    year = {2007},
+    volume = {7(2)},
+    pages = {47-52},
+  }
+
+
+@Article{cellminer,
+    title = {CellMiner: A Web-Based Suite of Genomic and Pharmacologic Tools 
+to Explore Transcript and Drug Patterns in the NCI-60 Cell Line Set },
+    author = {Reinhold WC and Sunshine M and Liu H and Varma S and Kohn KW and 
+Morris J and Doroshow J and Pommier Y},
+    journal = {Cancer Research},
+    year = {2012},
+    volume = {72(14)},
+    pages = {3499-511},
+  }
+
+@Article{omicade4,
+    title = {A multivariate approach to the integration of multi-omics datasets},
+    author = {Meng C and Kuster B and Culhane A and Gholami AM},
+    journal = {Manuscript under preparation},
+    year = {2013},
+    volume = {},
+    pages = {},
+  }
+
+@Article{mcia,
+  title={Analyses de la co-inertie de K nuages de points},
+  author={Chessel D and Hanafi M},
+  journal={Revue de statistique appliqu\'{e}e},
+  volume={44(2)},
+  pages={35-60},
+  year={1996},
+}
+
+@Article{pca,
+  title={Principal components analysis to summarize microarray experiments: application to sporulation time series},
+  author={Raychaudhuri S and Stuart JM and Altman RB},
+  journal={Pacific Symposium on Biocomputing},
+  volume={},
+  pages={455-466},
+  year={2000},
+}
+
+@Article{cia2003,
+  title={Cross-platform comparison and visualisation of gene expression data using co-inertia analysis},
+  author={Culhane AC and Perriere G and Higgins DG},
+  journal={BMC Bioinformatics},
+  volume={21(4)},
+  pages={59},
+  year={2003},
+}

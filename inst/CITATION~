@@ -1,0 +1,19 @@
+citHeader("To cite package 'omicade4' in publications use:")
+
+citEntry(entry="Article",
+  title = "A multivariate approach to the integration of multi-omics datasets.",
+  author = personList(as.person("Chen Meng"),
+                      as.person("Bernhard Kuster"),
+                      as.person("Aedin Culhane"),
+                      as.person("Amin Moghaddas Gholami")),
+  journal = "BMC bioinformatics",
+  volume = "15",
+  number = "",
+  pages = "",
+  year = "2014",
+  url = "",
+  doi = "",
+  textVersion = paste("Chen Meng, Bernhard Kuster, Aedin Culhane and Amin Moghaddas Gholami (2014):", 
+               "A multivariate approach to the integration of multi-omics datasets.",
+               "BMC bioinformatics")
+)

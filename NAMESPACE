@@ -1,0 +1,13 @@
+importFrom("made4", "array2ade4")
+importFrom("made4", "plotgenes")
+importFrom("made4", "s.var")
+import("ade4")
+
+S3method("plot", "mcia")
+S3method("plotVar", "mcia")
+S3method("plotVar", "cia")
+S3method("selectVar", "mcia")
+S3method("selectVar", "cia")
+
+export("mcia", "plot.mcia", "plotVar", "selectVar")
+
