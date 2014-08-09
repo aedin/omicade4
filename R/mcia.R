@@ -57,20 +57,12 @@ mcia <- function (df.list, cia.nf = 2, cia.scan = FALSE, nsc = T, svd=TRUE)
              fakeEnv)
   } else
     stop("logical value required for svd")
-  # =========================================
+
   pairwise.rv <- function(data.list) {
-    rv <- function(m1, m2) {
-      nscm1 <- crossprod(as.matrix(m1))
-      nscm2 <- crossprod(as.matrix(m2))
-      rv <- sum(nscm1*nscm2)/(sum(nscm1*nscm1)*sum(nscm2*nscm2))^0.5
-      return(rv)
-    }
-    n <- length(data.list)
-    a <- combn(1:n, 2, FUN=function(x) 
-      rv(data.list[[x[1]]], data.list[[x[2]]]), simplify=TRUE)
-    m <- matrix(1, n, n)
-    m[lower.tri(m)] <- a
-    m[upper.tri(m)] <- t(m)[upper.tri(m)]
+    ms <- sapply(data.list, function(x) {
+      x <- c(crossprod(as.matrix(x)))
+      x <- x/sqrt(sum(x^2))})
+    m <- crossprod(ms)
     colnames(m) <- rownames(m) <- names(data.list)
     return(m)
   }
